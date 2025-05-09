@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>맛집 상세</title>
+  <style>
+    body { font-family:sans-serif; background:#f4f4f4; padding:20px; }
+    h1 { font-size:24px; margin-bottom:10px; }
+    .details p { margin:6px 0; }
+    .photo { width:100%; max-width:600px; height:auto; margin:10px 0; }
+  </style>
+</head>
+<body>
+  <button onclick="history.back()">← 뒤로</button>
+  <div class="details" id="details">
+    <h1>Loading…</h1>
+  </div>
+
+  <script>
+    function getQueryParam(name) {
+      const params = new URLSearchParams(location.search);
+      return params.get(name);
+    }
+
+    function initDetail() {
+      const placeId = getQueryParam('place_id');
+      if (!placeId) {
+        document.getElementById('details').innerHTML =
+          '<p>잘못된 접근입니다.</p>';
+        return;
+      }
+      const service = new google.maps.places.PlacesService(
+        document.createElement('div')
+      );
+      service.getDetails({ placeId, fields: [
+        'name','formatted_address','formatted_phone_number',
+        'rating','website','opening_hours','photos'
+      ]}, (place, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK) {
+          document.getElementById('details').innerHTML =
+            '<p>정보를 가져오지 못했습니다.</p>';
+          return;
+        }
+        // 렌더링
+        let html = `<h1>${place.name}</h1>`;
+        if (place.photos && place.photos.length) {
+          const url = place.photos[0].getUrl({ maxWidth:600 });
+          html += `<img class="photo" src="${url}" alt="${place.name}">`;
+        }
+        html += `<p><strong>주소:</strong> ${place.formatted_address}</p>`;
+        if (place.formatted_phone_number) {
+          html += `<p><strong>전화:</strong> ${place.formatted_phone_number}</p>`;
+        }
+        html += `<p><strong>평점:</strong> ${place.rating || '정보 없음'}</p>`;
+        if (place.website) {
+          html += `<p><strong>웹사이트:</strong>
+                   <a href="${place.website}" target="_blank">
+                     ${place.website}
+                   </a></p>`;
+        }
+        if (place.opening_hours) {
+          html += '<p><strong>영업시간:</strong><br>' +
+            place.opening_hours.weekday_text.join('<br>') +
+            '</p>';
+        }
+        document.getElementById('details').innerHTML = html;
+      });
+    }
+
+    // Google Maps JS API 불러온 후 호출됨
+    function initMap(){ /* no-op */ }
+
+    document.addEventListener('DOMContentLoaded', initDetail);
+  </script>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?
+         key=AIzaSyAy_DG0i7oZwJ6TauuoiylGTDI_SO4pi2Y
+         &libraries=places
+         &callback=initMap"
+    async defer>
+  </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>명소 상세 보기 | SeoulDayNight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    /* ─── 공통 헤더/네비 ─── */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:sans-serif; background:#fafafa; }
+    .site-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:rgba(255,255,255,0.8);
+      backdrop-filter:blur(10px);
+      padding:1rem 2rem;
+      margin-bottom:1rem;
+      border-radius:8px;
+    }
+    .logo { font-size:1.5rem; font-weight:bold; }
+    .nav-list { list-style:none; display:flex; gap:1rem; }
+    .nav-list a { text-decoration:none; color:#333; }
+    .nav-list .active { color:#0066cc; font-weight:700; }
+    .header-actions a {
+      margin-left:1rem;
+      text-decoration:none;
+      background:#0066cc;
+      color:#fff;
+      padding:.5rem 1rem;
+      border-radius:4px;
+      transition:background .2s;
+    }
+    .header-actions a:hover { background:#0055aa; }
+
+    /* ─── 컨텐츠 ─── */
+    .container { max-width:800px; margin:0 auto; padding:0 1rem; }
+    h2 { font-size:2rem; margin-bottom:1rem; color:#333; }
+    p { margin:0.5rem 0; line-height:1.6; color:#555; }
+    p strong { color:#222; }
+    .inline-img {
+      display:block;
+      width:100%;
+      max-height:400px;
+      object-fit:cover;
+      margin:1rem 0;
+      border-radius:8px;
+    }
+
+    /* ─── 좋아요 버튼 ─── */
+    #like-btn {
+      display:inline-block;
+      padding:0.5rem 1rem;
+      background:#e74c3c;
+      color:#fff;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+      font-size:1rem;
+      transition:background .2s;
+    }
+    #like-btn.liked {
+      background:#c0392b;
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 -->
+  <header class="site-header">
+    <div class="logo">SeoulDayNight</div>
+    <nav>
+      <ul class="nav-list">
+        <li><a href="seoul2.html">Home</a></li>
+        <li><a href="attractions_night.html" class="active">야경 명소</a></li>
+        <li><a href="restaurants_night.html">야간 맛집</a></li>
+        <li><a href="events.html">야간 이벤트</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="footprints.html" aria-label="탐험하기">탐험하기</a>
+      <a href="login.html">로그인</a>
+    </div>
+  </header>
+
+  <!-- 상세 컨텐츠 -->
+  <div class="container" id="detail">
+    <h2 id="detail-title">로딩 중…</h2>
+    <div id="detail-content"><!-- 스크립트가 채웁니다 --></div>
+    <button id="like-btn">❤️ 좋아요</button>
+  </div>
+
+  <script>
+    (async function(){
+      const params = new URLSearchParams(location.search);
+      const title  = params.get('title');
+      if (!title) {
+        document.getElementById('detail-title').textContent = '잘못된 요청';
+        return;
+      }
+
+      // OpenAPI 호출
+      const API_KEY  = '586b44485376616c38365263715054';
+      const RESPONSE = 'json';
+      const SERVICE  = 'viewNightSpot';
+      const START    = 1, END = 500;
+      const apiUrl   =
+        `http://openapi.seoul.go.kr:8088/${API_KEY}/${RESPONSE}/${SERVICE}/${START}/${END}`;
+
+      try {
+        const res  = await fetch(apiUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const rows = json[SERVICE]?.row || [];
+        const item = rows.find(r => r.TITLE === title);
+        if (!item) throw new Error('명소 정보를 찾을 수 없습니다.');
+
+        // 이미지 URL 결정
+        const imgUrl = item.FIRSTIMAGE
+          ? item.FIRSTIMAGE
+          : `https://maps.googleapis.com/maps/api/staticmap?center=${item.Y},${item.X}` +
+            `&zoom=15&size=800x400&markers=${item.Y},${item.X}` +
+            `&key=AIzaSyAy_DG0i7oZwJ6TauuoiylGTDI_SO4pi2Y`;
+
+        // 상세 HTML
+        const html = `
+          <p><strong>주소:</strong> ${item.ADDR || '정보 없음'}</p>
+          <p><strong>운영시간:</strong> ${item.OPERATING_TIME || '정보 없음'}</p>
+          <p><strong>요금:</strong> ${item.ENTR_FEE || '무료'}</p>
+          <img class="inline-img"
+               src="${imgUrl}"
+               alt="${item.TITLE}"
+               onerror="this.onerror=null;this.src='images/placeholder.jpg';">
+          <p><strong>설명:</strong> ${item.CONTENTS || '없음'}</p>
+          <p><strong>교통-지하철:</strong> ${item.SUBWAY || '없음'}</p>
+          <p><strong>교통-버스:</strong> ${item.BUS || '없음'}</p>
+        `;
+        document.getElementById('detail-title').textContent = item.TITLE;
+        document.getElementById('detail-content').innerHTML = html;
+
+        // 좋아요 상태
+        const likeBtn = document.getElementById('like-btn');
+        const storageKey = `liked:${item.TITLE}`;
+        if (localStorage.getItem(storageKey) === '1') {
+          likeBtn.classList.add('liked');
+          likeBtn.textContent = '💖 좋아요';
+        }
+        likeBtn.addEventListener('click', () => {
+          if (localStorage.getItem(storageKey) === '1') {
+            localStorage.removeItem(storageKey);
+            likeBtn.classList.remove('liked');
+            likeBtn.textContent = '❤️ 좋아요';
+          } else {
+            localStorage.setItem(storageKey, '1');
+            likeBtn.classList.add('liked');
+            likeBtn.textContent = '💖 좋아요';
+          }
+        });
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById('detail').innerHTML =
+          `<h2>오류</h2><p>${err.message}</p>`;
+      }
+    })();
+  </script>
+</body>
+</html>
