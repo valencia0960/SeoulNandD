@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>서울의 밤 맛집 추천</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+  <style>
+    @font-face {
+      font-family: 'Shilla_CultureB-Bold';
+      src: url('./AnyConv.com__Shilla_Culture(B).woff') format('woff');
+      font-weight: 700; font-style: normal;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+    }
+
+    .site-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #000;
+      color: white;
+      padding: 0.75rem 2rem;
+    }
+    .site-header .logo {
+      font-family: 'Shilla_CultureB-Bold';
+      font-size: 28px;
+    }
+    .nav-list {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+    }
+    .nav-list a {
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+    }
+    .nav-list a:hover {
+      opacity: 0.8;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    h1 {
+      font-family: 'Shilla_CultureB-Bold';
+      font-size: 24px;
+      margin-bottom: 1rem;
+    }
+
+    .search-box {
+      display: flex;
+      margin-bottom: 1.5rem;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+    }
+    .search-box button {
+      padding: 10px 16px;
+      background: #000;
+      color: white;
+      border: none;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+    .search-box button:disabled {
+      background: #888;
+      cursor: not-allowed;
+    }
+
+    #result-list {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 2rem;
+    }
+    #result-list li {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    #result-list h2 {
+      font-family: 'Shilla_CultureB-Bold';
+      margin-bottom: 0.5rem;
+    }
+
+    #top-restaurants {
+      margin-top: 2rem;
+    }
+    #top-restaurants h2 {
+      font-family: 'Shilla_CultureB-Bold';
+      font-size: 20px;
+      margin-bottom: 1rem;
+    }
+
+    .rest-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .rest-card {
+      width: calc(25% - 0.75rem);
+      background: white;
+      border-radius: 6px;
+      text-align: center;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .rest-card img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-top-left-radius: 6px;
+      border-top-right-radius: 6px;
+    }
+    .rest-card p {
+      padding: 0.5rem;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 768px) {
+      .rest-card { width: calc(50% - 0.5rem); }
+    }
+
+    @media (max-width: 480px) {
+      .rest-card { width: 100%; }
+    }
+    .site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #ddd;
+}
+
+.logo {
+  font-family: 'Shilla_CultureB-Bold', sans-serif;
+  font-size: 28px;
+  color: #333;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-list li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 17px;
+}
+
+.nav-list li a:hover {
+  color: #0066cc;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-cta svg {
+  fill: #0066cc;
+  transition: transform 0.2s;
+}
+
+.btn-cta:hover svg {
+  transform: scale(1.2);
+}
+
+.btn-login {
+  padding: 0.4rem 1rem;
+  background: #0066cc;
+  color: white;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+}
+/* 서울의 낮 영역 */
+
+
+.hero-text h2 {
+  font-family: 'Shilla_CultureB-Bold', sans-serif;
+  font-size: 32px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.hero-text p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+  </style>
+</head>
+<body>
+ <header class="site-header">
+  <div class="logo">SeoulDayNight</div>
+  <nav>
+    <ul class="nav-list">
+      <li><a href="seoul2.html">홈</a></li>
+      <li><a href="pathways.html">산책로</a></li>
+      <li><a href="nightspots.html">야경명소</a></li>
+      <li><a href="restaurants_night.html">맛집</a></li>
+      <li><a href="events.html">이벤트/행사</a></li>
+    </ul>
+  </nav>
+  
+  <div class="header-actions">
+    <a href="nightspots.html" class="btn-cta" aria-label="탐험하기">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+           xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.5 15C3.67 15 3 15.67 3 16.5C3 17.33 3.67 18 4.5 18C5.33 18 6 17.33 6 16.5C6 15.67 5.33 15 4.5 15ZM9 13.5C8.07 13.5 7.29 14.08 7.08 15H12.92C12.71 14.08 11.93 13.5 11 13.5H9ZM15.5 12C14.67 12 14 12.67 14 13.5C14 14.33 14.67 15 15.5 15C16.33 15 17 14.33 17 13.5C17 12.67 16.33 12 15.5 12ZM19.5 9C18.67 9 18 9.67 18 10.5C18 11.33 18.67 12 19.5 12C20.33 12 21 11.33 21 10.5C21 9.67 20.33 9 19.5 9Z"/>
+      </svg>
+    </a>
+    <a href="login.html" class="btn-login">로그인</a>
+  </div>
+</header>
+<!-- 메뉴바 바로 아래에 삽입 -->
+<section id="hero-day" class="hero hero-day">
+    <div class="hero-overlay"></div>
+    <h1 class="hero-text">서울의 낮:맛집</h1>
+  </section>
+
+
+  <div class="container">
+    <h1>서울의 밤 맛집 검색</h1>
+
+    <div class="search-box">
+      <input type="text" id="search-input" placeholder="맛집 이름을 입력하세요" />
+      <button id="search-btn" disabled>검색</button>
+    </div>
+
+    <ul id="result-list">
+      <li id="no-data">맛집 이름을 입력하고 검색 버튼을 눌러주세요.</li>
+    </ul>
+
+    <section id="top-restaurants">
+      <h2>추천 평점 맛집 8선 (평점 ≥4.0)</h2>
+      <div class="rest-grid" id="rest-grid"></div>
+    </section>
+  </div>
+
+  <!-- 지도 컨테이너 -->
+  <div id="map" style="display: none;"></div>
+
+  <script>
+    const API_KEY = '6149786b6976616c36306976665363';
+    const SERVICE_NAME = 'LOCALDATA_072404';
+    const apiUrl = `http://openapi.seoul.go.kr:8088/${API_KEY}/json/${SERVICE_NAME}/1/500`;
+    let spots = [];
+
+    async function initData() {
+      try {
+        const res = await fetch(apiUrl);
+        const json = await res.json();
+        if (json[SERVICE_NAME].RESULT.CODE !== 'INFO-000') {
+          throw new Error(json[SERVICE_NAME].RESULT.MESSAGE);
+        }
+        spots = json[SERVICE_NAME].row || [];
+        document.getElementById('search-btn').disabled = false;
+      } catch (err) {
+        console.error('맛집 데이터 로드 실패:', err);
+        document.getElementById('no-data').textContent =
+          '맛집 정보를 불러오는 중 오류가 발생했습니다.';
+      }
+    }
+
+    function doSearch() {
+      const keyword = document.getElementById('search-input').value.trim().toLowerCase();
+      const listEl = document.getElementById('result-list');
+      listEl.innerHTML = '';
+
+      if (!keyword) {
+        listEl.innerHTML = '<li>맛집 이름을 입력하고 검색 버튼을 눌러주세요.</li>';
+        return;
+      }
+
+      const filtered = spots.filter(item =>
+        item.BPLCNM.toLowerCase().includes(keyword)
+      );
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `<li>“${keyword}”에 해당하는 맛집이 없습니다.</li>`;
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(item => `
+        <li>
+          <h2>${item.BPLCNM}</h2>
+          <p><strong>주소:</strong> ${item.RDNWHLADDR}</p>
+          <p><strong>전화:</strong> ${item.SITETEL || '정보 없음'}</p>
+        </li>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initData();
+      document.getElementById('search-btn').addEventListener('click', doSearch);
+      document.getElementById('search-input').addEventListener('keyup', e => {
+        document.getElementById('search-btn').disabled = !e.target.value.trim();
+        if (e.key === 'Enter' && e.target.value.trim()) doSearch();
+      });
+    });
+
+    let map, placesService;
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'));
+      placesService = new google.maps.places.PlacesService(map);
+
+      const center = { lat: 37.5665, lng: 126.9780 };
+      placesService.nearbySearch({
+        location: center,
+        radius: 1000,
+        type: 'restaurant'
+      }, (results, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK) return;
+        const good = results.filter(r => r.rating >= 4.0);
+        const pick = [];
+        const copy = good.slice();
+        while (pick.length < 8 && copy.length) {
+          const idx = Math.floor(Math.random() * copy.length);
+          pick.push(copy.splice(idx, 1)[0]);
+        }
+
+        const grid = document.getElementById('rest-grid');
+        grid.innerHTML = pick.map(p => {
+          const img = p.photos
+            ? p.photos[0].getUrl({ maxWidth: 120, maxHeight: 80 })
+            : 'images/placeholder.jpg';
+          const gmapsLink = `https://www.google.com/maps/place/?q=place_id:${p.place_id}`;
+          return `
+            <a href="${gmapsLink}" target="_blank" class="rest-card" title="자세히 보기">
+              <img src="${img}" alt="${p.name}">
+              <p>${p.name}</p>
+            </a>
+          `;
+        }).join('');
+      });
+    }
+  </script>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy_DG0i7oZwJ6TauuoiylGTDI_SO4pi2Y&libraries=places&callback=initMap"
+    async defer>
+  </script>
+</body>
+</html>

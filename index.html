@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>서울의 낮과 밤</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+  <style>
+    .rainfall-box, .air-box {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      max-width: 280px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    .rainfall-box h2, .air-box h2 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+    }
+    .rainfall-box p, .air-box p {
+      margin: 0.5rem 0;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 배경 레이어 -->
+  <div class="bg-layer bg-day"></div>
+  <div class="bg-layer bg-night"></div>
+
+  <header class="site-header">
+    <div class="logo"><img src="./logo_without_letter.png"></div>
+     <nav>
+    <ul class="nav-list"></ul>
+   </nav>
+     <!-- 액션 버튼들 래퍼 -->
+  <div class="header-actions">
+    <!-- 탐험하기: 발자국 아이콘 -->
+    <button class="btn-cta" aria-label="탐험하기">
+      <!-- 간단한 발자국 SVG -->
+      <a href="./footprints.html">발자국 남기기</a>
+    </button>
+
+    <!-- 로그인 버튼 -->
+    <button class="btn-login"><a href="./login.html">로그인</a></button>
+  </div>
+  </header>
+
+  <!-- 낮 히어로 -->
+  <section id ="hero-day" class="hero hero-day">
+    <div class="hero-overlay"></div>
+    <h1 class="hero-text">서울의 낮</h1>
+  </section>
+
+  <!-- 낮용 카드 (짧게, 히어로 위로 조금 겹치도록 margin-top: -80px) -->
+  <section class="features features-day">
+    <a href="./pathways.html" class="card-link">
+    <article class="card">
+      <h2>산책로 추천</h2>
+      <p>산책로를 걸으며 느끼는 아름다운 서울 경관</p>
+    </article>
+  </a>
+  <a href="./restaurants_day.html" class="card-link">
+    <article class="card">
+      <h2>맛집 안내</h2>
+      <p>낮에도 반짝이는 맛의 세계.</p>
+    </article>
+  </a>
+ 
+  </section>
+
+  <!-- 밤 히어로 -->
+  <section id="hero-night" class="hero hero-night">
+    <div class="hero-overlay"></div>
+    <h1 class="hero-text">서울의 밤</h1>
+  </section>
+
+  <!-- 밤용 카드 -->
+  <section class="features features-night">
+    <a href="./attractions_night.html" class="card-link">
+    <article class="card">
+      <h2>야경 명소</h2>
+      <p>서울의 밤하늘 아래 빛나는 명소들.</p>
+    </article>
+  </a>
+    <a href="./events.html" class="card-link">
+    <article class="card">
+      <h2>야간 이벤트</h2>
+      <p>달빛 아래 펼쳐지는 특별한 행사.</p>
+    </article></a>
+  </section>
+    <aside class="weather-widget" aria-labelledby="weather-widget-title">
+      <h2 id="weather-widget-title">오늘의 날씨 정보</h2>
+  
+      <div class="rainfall-box">
+        <h3><img src="./images/rain.webp" alt="빗방울 아이콘" class="icon"> 강우량</h3>
+        <p id="rainfall10">로딩 중…</p>
+        <small id="receiveTime"></small>
+      </div>
+  
+      <div class="air-box">
+        <h3><img src="./images/icon_14.png" alt="바람 아이콘" class="icon"> 대기환경지수</h3>
+        <p id="aq-grade">로딩 중…</p>
+        <p id="aq-index"></p>
+      </div>
+  </aside>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // ── 1) 강우량 API 호출 ──
+      try {
+        const rainKey = '6b444b744f76616c313232776f57724e';
+        const rainRes = await fetch(
+          `http://openapi.seoul.go.kr:8088/${rainKey}/json/ListRainfallService/1/1`
+        );
+        const rainJson = await rainRes.json();
+        const rainRow = rainJson.ListRainfallService?.row?.[0];
+        if (rainRow) {
+          document.getElementById('rainfall10').textContent =
+            `10분 우량: ${rainRow.RAINFALL10} mm`;
+          document.getElementById('receiveTime').textContent =
+            `측정 시각: ${rainRow.RECEIVE_TIME}`;
+        } else {
+          throw new Error('강우량 데이터 없음');
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('rainfall-content').innerHTML =
+          `<p style="color:red;">강우량 정보 로딩 오류:<br>${err.message}</p>`;
+      }
+
+      // ── 2) 대기환경지수 API 호출 ──
+      try {
+        const airKey = '4e6744485176616c323566596a5959';
+        const airRes = await fetch(
+          `http://openapi.seoul.go.kr:8088/${airKey}/json/ListAvgOfSeoulAirQualityService/1/1`
+        );
+        const airJson = await airRes.json();
+        const airRow = airJson.ListAvgOfSeoulAirQualityService?.row?.[0];
+        if (airRow) {
+          document.getElementById('aq-grade').textContent =
+            `등급: ${airRow.GRADE}`;
+          document.getElementById('aq-index').textContent =
+            `지수: ${airRow.IDEX_MVL}`;
+          document.getElementById('aq-pm10').textContent =
+            `PM10: ${airRow.PM10} µg/m³`;
+          document.getElementById('aq-pm25').textContent =
+            `PM2.5: ${airRow.PM25} µg/m³`;
+        } else {
+          throw new Error('대기환경지수 데이터 없음');
+        }
+      } catch (err) {
+        console.error(err);
+        document.getElementById('air-content').innerHTML =
+          `<p style="color:red;">대기환경 정보 로딩 오류:<br>${err.message}</p>`;
+      }
+    });
+    </script>
+  <script defer src="script.js"></script>
+</body>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>명소 상세정보</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+  <style>
+    body { font-family:sans-serif; background:#f4f4f4; padding:1rem; }
+    .container { max-width:800px; margin:0 auto; background:#fff; padding:1.5rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    img { width:100%; height:auto; border-radius:8px; object-fit:cover; margin-bottom:1rem; }
+    h1 { margin-top:0; }
+    p { margin:0.5rem 0; }
+    .categories { margin-top:1rem; font-size:0.9rem; color:#666; }
+    #map { width:100%; height:350px; margin-top:1rem; border-radius:8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 id="title">명소명</h1>
+    <img id="img" src="images/placeholder.jpg" alt="명소 이미지" />
+    <p id="addr"></p>
+    <p id="desc"></p>
+    <p id="time"></p>
+    <p id="fee"></p>
+    <div class="categories" id="cats">카테고리: </div>
+    <div id="map"></div>
+  </div>
+
+  <script>
+    const title = new URLSearchParams(location.search).get('title');
+    const API_KEY = '586b44485376616c38365263715054';
+    const SERVICE = 'viewNightSpot';
+    const apiUrl = `http://openapi.seoul.go.kr:8088/${API_KEY}/json/${SERVICE}/1/500`;
+
+    let map;
+    fetch(apiUrl)
+      .then(res => res.json())
+      .then(json => {
+        const data = json[SERVICE].row || [];
+        const spot = data.find(p => p.TITLE === title);
+        if (!spot) return;
+        document.getElementById('title').textContent = spot.TITLE;
+        document.getElementById('addr').textContent = `📍 주소: ${spot.ADDR}`;
+        document.getElementById('desc').textContent = `📖 설명: ${spot.CONTENTS || '설명 없음'}`;
+        document.getElementById('time').textContent = `⏰ 운영시간: ${spot.OPERATING_TIME || '정보 없음'}`;
+        document.getElementById('fee').textContent = `💰 요금: ${spot.ENTR_FEE || '무료'}`;
+
+        const fn = spot.TITLE.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\\s+/g,'').replace(/[^가-힣a-zA-Z0-9]/g,'');
+        document.getElementById('img').src = `images/${fn}.jpg`;
+
+        const categories = [];
+        if (/야경|전망|풍경|조망/.test(spot.CONTENTS || '')) categories.push('풍경이 아름다운');
+        if (/지하철|버스|접근|가깝/.test(spot.SUBWAY+spot.BUS || '')) categories.push('접근성이 좋은');
+        if (/반려|동물|애완|목줄/.test(spot.CONTENTS || '')) categories.push('애완동물이 동반 가능한');
+        if (/화장실|편의|시설|벤치/.test(spot.CONTENTS || '')) categories.push('편의시설이 잘 갖추어진');
+        if (/주차|파킹|공영/.test(spot.CONTENTS || '')) categories.push('주차가 편한');
+        if (/분위기|로맨틱|감성|야경/.test(spot.CONTENTS || '')) categories.push('분위기가 로맨틱한/서정적인');
+        if (/아이|가족|어린이|함께/.test(spot.CONTENTS || '')) categories.push('가족과 함께하기 좋은');
+        document.getElementById('cats').textContent = `카테고리: ${categories.join(', ')}`;
+
+        const lat = parseFloat(spot.LA), lng = parseFloat(spot.LO);
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: { lat, lng }, zoom: 15
+        });
+        new google.maps.Marker({
+          position: { lat, lng }, map, title: spot.TITLE
+        });
+      });
+  </script>
+
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy_DG0i7oZwJ6TauuoiylGTDI_SO4pi2Y&callback=()=>{}"
+    async defer>
+  </script>
+</body>
+</html>

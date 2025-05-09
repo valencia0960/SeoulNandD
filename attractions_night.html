@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>서울의 야경명소 검색</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+  <style>
+   
+    /* ── 레이아웃: 메인 + 사이드바 ── */
+    .layout {
+      display: flex;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    main { flex: 2; }
+    aside { flex: 1; padding-left: 20px; }
+
+    /* ── 메인 컨텐츠 ── */
+    .container { /* margin removed, handled by .layout */ }
+    h1 { margin-bottom:20px; font-family:'Shilla_CultureB-Bold'; }
+
+    .search-box { display:flex; margin-bottom:20px; }
+    .search-box input {
+      flex:1; padding:8px 12px; font-size:16px;
+      border:1px solid #ccc; border-radius:4px 0 0 4px; outline:none;
+    }
+    .search-box button {
+      padding:8px 16px; font-size:16px;
+      border:1px solid #000; background:#000;
+      color:#fff; cursor:pointer; border-radius:0 4px 4px 0;
+    }
+    .search-box button:disabled { background:#666; cursor:not-allowed; }
+
+    .recommend { margin-bottom:30px; }
+    .recommend h2 {
+      font-size:20px; margin-bottom:10px;
+      font-family:'Shilla_CultureB-Bold';
+    }
+    .recommend ul {
+      list-style:none; display:flex; flex-wrap:wrap; gap:12px;
+    }
+    .recommend ul li {
+      background:#fff; border:1px solid #ddd;
+      border-radius:4px; padding:10px; width:calc(50% - 6px);
+      cursor:pointer;
+    }
+    .recommend ul li:hover { background:#f0f0f0; }
+    .recommend ul li h3 {
+      margin:0 0 6px; font-size:16px;
+      font-family:'Shilla_CultureB-Bold';
+    }
+    .recommend ul li p { margin:4px 0; font-size:13px; }
+
+    #night-list { list-style:none; padding:0; }
+    #night-list li {
+      background:#fff; border:1px solid #ddd;
+      border-radius:4px; padding:12px; margin-bottom:12px;
+    }
+    #night-list li h2 {
+      margin-bottom:6px; font-size:20px;
+      font-family:'Shilla_CultureB-Bold';
+    }
+    #night-list li p { margin:4px 0; font-size:14px; }
+
+    .inline-img {
+      display:block; width:100%; height:auto;
+      margin:8px 0; border-radius:4px; object-fit:cover;
+    }
+
+    /* ── 사이드바: 주변 맛집 ── */
+     .restaurants { }
+    .restaurants h2 {
+      font-size:20px; margin-bottom:10px;
+      font-family:'Shilla_CultureB-Bold';
+    }
+    .restaurants ul { list-style:none; padding:0; }
+    .restaurants li {
+      background:#fff; border:1px solid #ddd;
+      border-radius:4px; padding:10px; margin-bottom:8px;
+    }
+    .restaurants li a {
+      display:flex; text-decoration:none; color:inherit;
+      align-items:center;
+    }
+    .restaurants .thumb {
+      flex-shrink:0;
+      width:80px; height:80px;
+      margin-right:10px;
+      object-fit:cover;
+      border-radius:4px;
+    }
+    .restaurants .info {
+      flex:1;
+    }
+    .restaurants .info h4 {
+      margin:0 0 4px; font-size:18px;
+      font-family:'Shilla_CultureB-Bold';
+    }
+    .restaurants .info p {
+      margin:2px 0; font-size:14px;
+    }
+     * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      line-height: 1.5;
+    }
+    
+    .logo { font-size: 1.5rem; font-weight: bold; }
+    .hero {
+      position: relative;
+      height: 200px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      background: url('images/night_background.jpg') center/cover no-repeat;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
+    .hero-text {
+      position: relative;
+      color: #fff;
+      font-size: 2.5rem;
+      text-align: center;
+      line-height: 200px;
+    }
+
+    .category-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 2rem auto;
+      max-width: 800px;
+    }
+    .category-buttons a {
+      padding: 0.75rem 1.5rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: white;
+      font-size: 1rem;
+      text-decoration: none;
+      color: #333;
+      transition: all 0.2s;
+    }
+    .category-buttons a:hover {
+      background: #0066cc;
+      color: #fff;
+      border-color: #0066cc;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: #eee;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+   <header class="site-header">
+    <div class="logo">SeoulDayNight</div>
+    <nav>
+      <ul class="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="pathways.html">산책로</a></li>
+        <li><a href="restaurants_day.html">맛집</a></li>
+        <li><a href="attractions_night.html" class="active">야경명소</a></li>
+      
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="nightspots.html">탐험하기</a>
+      <a href="login.html">로그인</a>
+    </div>
+  </header>
+  <div class="layout">
+    <main>
+      <h1>서울의 야경명소 검색</h1>
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="장소명을 입력하세요" />
+        <button id="search-btn" disabled>검색</button>
+      </div>
+
+      <div class="recommend" id="recommend-section" style="display:none;">
+        <h2>추천 명소</h2>
+        <ul id="recommend-list"></ul>
+      </div>
+
+      <ul id="night-list">
+        <li id="no-data">장소명을 입력하고 검색 버튼을 눌러주세요.</li>
+      </ul>
+
+    <div class="category-buttons">
+      <a href="recommend_night.html?cat=scenic" target="_blank">풍경이 아름다운</a>
+      <a href="recommend_night.html?cat=accessible" target="_blank">접근성이 좋은</a>
+      <a href="recommend_night.html?cat=pet" target="_blank">애완동물 동반 가능</a>
+      <a href="recommend_night.html?cat=facilities" target="_blank">편의시설이 잘 갖추어진</a>
+      <a href="recommend_night.html?cat=parking" target="_blank">주차가 편한</a>
+      <a href="recommend_night.html?cat=romantic" target="_blank">로맨틱한/서정적인 분위기</a>
+      <a href="recommend_night.html?cat=family" target="_blank">가족과 함께하기 좋은</a>
+    </div>
+
+      <!-- 지도 -->
+      <div id="map" style="width:100%;height:400px;margin:20px 0;"></div>
+    </main>
+
+    <aside class="restaurants" aria-labelledby="restaurant-heading">
+      <h2 id="restaurant-heading">주변 맛집 (평점 ≥4.0, 반경 500m)</h2>
+      <ul id="restaurant-list">
+        <!-- 검색 시 최대 5개 표시 -->
+      </ul>
+    </aside>
+  </div>
+
+  <script>
+    let map, markers = [], restaurantMarkers = [], spots = [];
+
+    function initMap() {
+      const seoul = { lat: 37.5665, lng: 126.9780 };
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: seoul, zoom: 12
+      });
+      if (spots.length) placeMarkers(spots);
+    }
+
+    function placeMarkers(list) {
+      markers.forEach(m => m.setMap(null));
+      markers = [];
+      list.forEach(item => {
+        const lat = parseFloat(item.LA||item.Y),
+              lng = parseFloat(item.LO||item.X);
+        if (isNaN(lat)||isNaN(lng)) return;
+        const m = new google.maps.Marker({
+          position:{lat,lng}, map, title:item.TITLE
+        });
+        const iw = new google.maps.InfoWindow({
+          content:`<h3>${item.TITLE}</h3><p>${item.ADDR}</p>`
+        });
+        m.addListener('click', () => iw.open(map,m));
+        markers.push(m);
+      });
+    }
+
+    function searchNearbyRestaurants(lat, lng) {
+      restaurantMarkers.forEach(m=>m.setMap(null));
+      restaurantMarkers = [];
+
+      const service = new google.maps.places.PlacesService(map);
+      service.nearbySearch({
+        location: { lat, lng },
+        radius: 500,
+        type: 'restaurant'
+      }, (results, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK) return;
+        const good = results
+          .filter(p => p.rating >= 4.0)
+          .slice(0,5); // 최대 5개
+        // 지도에 마커
+        good.forEach(p => {
+          const m = new google.maps.Marker({
+            map, position: p.geometry.location, title: p.name
+          });
+          const iw = new google.maps.InfoWindow({
+            content:`<h4>${p.name}</h4>
+                     <p>평점: ${p.rating}</p>
+                     <p>${p.vicinity}</p>`
+          });
+          m.addListener('click', ()=>iw.open(map,m));
+          restaurantMarkers.push(m);
+        });
+        // 사이드바 리스트
+        document.getElementById('restaurant-list').innerHTML = good.map(p=>`
+          <li>
+            <h4>${p.name}</h4>
+            <p>평점: ${p.rating}</p>
+            <p>${p.vicinity}</p>
+          </li>
+        `).join('');
+      });
+    }
+
+    // OpenAPI 야경명소 로드
+    const API_KEY       = '586b44485376616c38365263715054';
+    const RESPONSE_TYPE = 'json';
+    const SERVICE_NAME  = 'viewNightSpot';
+    const START_INDEX   = 1;
+    const END_INDEX     = 500;
+    const apiUrl =
+      `http://openapi.seoul.go.kr:8088/${API_KEY}/${RESPONSE_TYPE}/` +
+      `${SERVICE_NAME}/${START_INDEX}/${END_INDEX}`;
+
+    function pickRandom(arr,n) {
+      const a=arr.slice(),r=[];
+      n=Math.min(n,a.length);
+      while(r.length<n){
+        const i=Math.floor(Math.random()*a.length);
+        r.push(...a.splice(i,1));
+      }
+      return r;
+    }
+
+    async function initData() {
+      try {
+        const res = await fetch(apiUrl);
+        const json = await res.json();
+        if (json[SERVICE_NAME].RESULT.CODE !== 'INFO-000')
+          throw new Error(json[SERVICE_NAME].RESULT.MESSAGE);
+        spots = json[SERVICE_NAME].row || [];
+
+        // 추천 명소
+        const recs = pickRandom(spots,5),
+              recList = document.getElementById('recommend-list');
+        recList.innerHTML = recs.map(item=>`
+          <li data-title="${item.TITLE}">
+            <h3>${item.TITLE}</h3>
+            <p>${item.ADDR}</p>
+          </li>
+        `).join('');
+        document.getElementById('recommend-section').style.display = 'block';
+        document.getElementById('search-btn').disabled = false;
+
+        recList.querySelectorAll('li').forEach(li=>{
+          li.addEventListener('click', ()=>{
+            showDetail(li.dataset.title);
+          });
+        });
+
+        if (map) placeMarkers(spots);
+      } catch(err) {
+        console.error('로드 실패:', err);
+        document.getElementById('no-data').textContent =
+          '명소 정보를 불러오는 중 오류가 발생했습니다.';
+      }
+    }
+
+    function showDetail(title) {
+      const item = spots.find(s=>s.TITLE === title);
+      if (!item) return;
+      renderList([item]);
+      const lat = parseFloat(item.LA||item.Y),
+            lng = parseFloat(item.LO||item.X);
+      if (map) {
+        placeMarkers([item]);
+        map.panTo({lat,lng});
+        searchNearbyRestaurants(lat,lng);
+      }
+    }
+
+    function doSearch() {
+      const kw = document.getElementById('search-input')
+                   .value.trim().toLowerCase();
+      if (!kw) {
+        document.getElementById('night-list').innerHTML =
+          '<li>장소명을 입력하고 검색 버튼을 눌러주세요.</li>';
+        return;
+      }
+      const filtered = spots.filter(i=>
+        i.TITLE.toLowerCase().includes(kw)
+      );
+      if (filtered.length === 0) {
+        document.getElementById('night-list').innerHTML =
+          `<li>“${kw}”에 해당하는 명소가 없습니다.</li>`;
+        return;
+      }
+      renderList(filtered);
+      const first = filtered[0];
+      const lat = parseFloat(first.LA||first.Y),
+            lng = parseFloat(first.LO||first.X);
+      if (map) {
+        placeMarkers(filtered);
+        map.panTo({lat,lng});
+        searchNearbyRestaurants(lat,lng);
+      }
+    }
+
+    function renderList(list) {
+      document.getElementById('night-list').innerHTML =
+        list.map(item=>{
+          const fn = item.TITLE
+            .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+            .replace(/\s+/g,'')
+            .replace(/[^가-힣a-zA-Z0-9]/g,'');
+          const imgUrl = `images/${fn}.jpg`;
+          return `
+            <li>
+              <h2>${item.TITLE}</h2>
+              <p><strong>주소:</strong> ${item.ADDR}</p>
+              <p><strong>운영시간:</strong> ${item.OPERATING_TIME||'정보 없음'}</p>
+              <p><strong>요금:</strong> ${item.ENTR_FEE||'무료'}</p>
+              <img class="inline-img"
+                   src="${imgUrl}"
+                   alt="${item.TITLE}"
+                   onerror="this.onerror=null;this.src='images/placeholder.jpg';">
+              <p><strong>설명:</strong> ${item.CONTENTS||'없음'}</p>
+              <p><strong>교통-지하철:</strong> ${item.SUBWAY||'없음'}</p>
+              <p><strong>교통-버스:</strong> ${item.BUS||'없음'}</p>
+            </li>
+          `;
+        }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      initData();
+      document.getElementById('search-btn').addEventListener('click', doSearch);
+      document.getElementById('search-input').addEventListener('keyup', e=>{
+        document.getElementById('search-btn').disabled = !e.target.value.trim();
+        if (e.key === 'Enter' && e.target.value.trim()) doSearch();
+      });
+    });
+    function searchNearbyRestaurants(lat, lng) {
+      restaurantMarkers.forEach(m=>m.setMap(null));
+      restaurantMarkers = [];
+
+      const service = new google.maps.places.PlacesService(map);
+      service.nearbySearch({
+        location: { lat, lng },
+        radius: 500,
+        type: 'restaurant'
+      }, (results, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK) return;
+
+        // 평점 ≥4.0, 최대 5개
+        const good = results
+          .filter(p => p.rating >= 4.0)
+          .slice(0,5);
+
+        // 지도 마커
+        good.forEach(p => {
+          const m = new google.maps.Marker({
+            map,
+            position: p.geometry.location,
+            title: p.name
+          });
+          const iw = new google.maps.InfoWindow({
+            content: `<h4>${p.name}</h4><p>평점: ${p.rating}</p>`
+          });
+          m.addListener('click', ()=> iw.open(map, m));
+          restaurantMarkers.push(m);
+        });
+
+        // 사이드바 리스트
+        const listEl = document.getElementById('restaurant-list');
+        listEl.innerHTML = good.map(p => {
+          // 사진이 있으면 첫번째, 없으면 placeholder
+          const photoUrl = p.photos
+            ? p.photos[0].getUrl({ maxWidth: 160, maxHeight:80 })
+            : 'images/placeholder.jpg';
+          // place_id를 쿼리 파라미터로
+          return `
+            <li>
+              <a href="restaurant_detail.html?place_id=${p.place_id}">
+                <img class="thumb"
+                     src="${photoUrl}"
+                     alt="${p.name}">
+                <div class="info">
+                  <h4>${p.name}</h4>
+                  <p>평점: ${p.rating}</p>
+                  <p>${p.vicinity}</p>
+                </div>
+              </a>
+            </li>
+          `;
+        }).join('');
+      });
+    }
+  </script>
+
+  <!-- 2) Google Maps & Places API 로드 -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy_DG0i7oZwJ6TauuoiylGTDI_SO4pi2Y&libraries=places&callback=initMap"
+    async defer>AIzaSyAy_DG0i7oZwJ6TauuoiylGTDI_SO4pi2Y
+  </script>
+</body>
+</html>

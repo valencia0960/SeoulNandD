@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>공원 산책로 추천 | SeoulDayNight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      line-height: 1.5;
+    }
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .logo { font-size: 1.5rem; font-weight: bold; }
+    .nav-list { list-style: none; display: flex; gap: 1rem; }
+    .nav-list a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    .nav-list .active { color: #0066cc; font-weight: 700; }
+    .header-actions a {
+      margin-left: 1rem;
+      text-decoration: none;
+      background: #0066cc;
+      color: #fff;
+      padding: .5rem 1rem;
+      border-radius: 4px;
+      transition: background .2s;
+    }
+    .header-actions a:hover { background: #0055aa; }
+
+    .hero {
+      position: relative;
+      height: 300px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+      background: url('https://raw.githubusercontent.com/valencia0960/image/refs/heads/main/%EB%B0%B0%EA%B2%BD4.jpg')
+                  center/cover no-repeat;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
+    .hero-text {
+      position: relative;
+      color: #fff;
+      font-size: 3rem;
+      text-align: center;
+      line-height: 300px;
+    }
+
+    .search-box {
+      display: flex;
+      max-width: 600px;
+      margin: 0 auto 1rem;
+    }
+    .search-box input {
+      flex: 1;
+      padding: .75rem 1rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px 0 0 4px;
+      outline: none;
+    }
+    .search-box button {
+      padding: .75rem 1.5rem;
+      font-size: 1rem;
+      border: none;
+      background: #0066cc;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 0 4px 4px 0;
+      transition: background .2s;
+    }
+    .search-box button:disabled { background: #aaa; cursor: not-allowed; }
+    .search-box button:hover:not(:disabled) { background: #0055aa; }
+
+    .category-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    .category-buttons button {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: white;
+      cursor: pointer;
+    }
+    .category-buttons button.active {
+      background: #0066cc;
+      color: white;
+      border-color: #0066cc;
+    }
+
+    h2.section-title {
+      max-width: 1200px;
+      margin: 0 auto .5rem;
+      padding: 0 1rem;
+      font-size: 1.5rem;
+      color: #333;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+      gap: 1rem;
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+    }
+    .feature-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+    .feature-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    .feature-info {
+      padding: 1rem;
+      flex-grow: 1;
+    }
+    .feature-info h3 {
+      margin: 0 0 .5rem;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    .feature-info p {
+      margin: 0;
+      font-size: .9rem;
+      color: #555;
+    }
+
+    #map {
+      width: 100%;
+      height: 400px;
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">SeoulDayNight</div>
+    <nav>
+      <ul class="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#hero-day">서울의 낮</a></li>
+        <li><a href="index.html#hero-night">서울의 밤</a></li>
+        <li><a href="#" class="active">공원 추천</a></li>
+        <li><a href="attractions_night.html">야경 명소</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="footprints.html">탐험하기</a>
+      <a href="login.html">로그인</a>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <h1 class="hero-text">공원 산책로 추천</h1>
+  </section>
+
+  <div class="search-box">
+    <input id="search-input" type="text" placeholder="공원명을 입력하세요">
+    <button id="search-btn" disabled>검색</button>
+  </div>
+
+      <h2 class="section-title">오늘의 추천 공원</h2>
+  <div class="category-buttons">
+    <!-- parks.html (기존 페이지 내 버튼 영역) -->
+<div class="category-buttons">
+  <button onclick="window.open('recommend.html?cat=고즈넉한', '_blank')">고즈넉한</button>
+  <button onclick="window.open('recommend.html?cat=식물이 많은', '_blank')">식물이 많은</button>
+  <button onclick="window.open('recommend.html?cat=풍광이 아름다운', '_blank')">풍광이 아름다운</button>
+  <button onclick="window.open('recommend.html?cat=접근성이 좋은', '_blank')">접근성이 좋은</button>
+  <button onclick="window.open('recommend.html?cat=거리가 짧은', '_blank')">거리가 짧은</button>
+  <button onclick="window.open('recommend.html?cat=거리가 긴', '_blank')">거리가 긴</button>
+  <button onclick="window.open('recommend.html?cat=편의시설이 잘 갖추어짐', '_blank')">편의시설이 잘 갖추어짐</button>
+  <button onclick="window.open('recommend.html?cat=애완동물 동반 가능', '_blank')">애완동물 동반 가능</button>
+  <button onclick="window.open('recommend.html?cat=매력적인 계절', '_blank')">매력적인 계절</button>
+</div>
+
+  </div>
+
+  <div id="random-section" class="features">로딩 중…</div>
+
+  <h2 class="section-title">검색 결과</h2>
+  <div id="result-section" class="features"></div>
+
+  <div id="map"></div>
+
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAy_DG0i7oZwJ6TauuoiylGTDI_SO4pi2Y&callback=initMap" async defer></script>
+  <script>
+    let map, markers = [], parks = [];
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 37.5665, lng: 126.9780 }, zoom: 12
+      });
+    }
+
+    function renderCards(list, container) {
+      container.innerHTML = '';
+      markers.forEach(m => m.setMap(null));
+      markers = [];
+
+      list.forEach(item => {
+        const lat = parseFloat(item.LATITUDE || item.LAT);
+        const lng = parseFloat(item.LONGITUDE || item.LNG);
+        const img = item.P_IMG || 'images/placeholder.jpg';
+
+        const a = document.createElement('a');
+        a.href = `detail_park.html?p_idx=${item.P_IDX}`;
+        a.className = 'feature-card';
+        a.innerHTML = `
+          <img src="${img}" alt="${item.P_PARK}">
+          <div class="feature-info">
+            <h3>${item.P_PARK}</h3>
+            <p>${item.P_LIST_CONTENT || ''}</p>
+          </div>`;
+        container.appendChild(a);
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const marker = new google.maps.Marker({
+            position: { lat, lng },
+            map,
+            title: item.P_PARK
+          });
+          markers.push(marker);
+        }
+      });
+
+      if (markers.length) {
+        const bounds = new google.maps.LatLngBounds();
+        markers.forEach(m => bounds.extend(m.getPosition()));
+        map.fitBounds(bounds);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+    const API_KEY     = '6a5a634c7576616c3636715a75706a';
+    const SERVICE     = 'SearchParkInfoService';
+    const API_URL     = `http://openapi.seoul.go.kr:8088/${API_KEY}/json/${SERVICE}/1/200`;
+    const randomSection = document.getElementById('random-section');
+    const resultSection = document.getElementById('result-section');
+    const searchInput   = document.getElementById('search-input');
+    const searchBtn     = document.getElementById('search-btn');
+    const categoryButtons = document.querySelectorAll('.category-buttons button'); 
+    let parks = [];
+
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(json => {
+          const data = json[SERVICE]?.row || [];
+          data.forEach(p => {
+            p.categories = [];
+            if (/조용|고즈넉|호젓|사색|정숙/.test(p.P_LIST_CONTENT || '')) p.categories.push('고즈넉한');
+            if (/나무|정원|식물|꽃|초화/.test(p.MAIN_PLANTS || '')) p.categories.push('식물이 많은');
+            if (/전망|풍경|경치|뷰|조망/.test(p.P_LIST_CONTENT || '')) p.categories.push('풍광이 아름다운');
+            if (/지하철|버스|역|가까운|주차/.test(p.VISIT_ROAD || '')) p.categories.push('접근성이 좋은');
+            if (/0\.5km|0\.6km|0\.7km|0\.8km|0\.9km|1\.0km/.test(p.P_LIST_CONTENT || '')) p.categories.push('거리가 짧은');
+            if (/3km|4km|5km|6km|장거리/.test(p.P_LIST_CONTENT || '')) p.categories.push('거리가 긴');
+            if (/화장실|편의|벤치|운동시설|체육/.test(p.MAIN_EQUIP || '')) p.categories.push('편의시설이 잘 갖추어짐');
+            if (/애완동물|반려동물|목줄/.test(p.USE_REFER || '')) p.categories.push('애완동물 동반 가능');
+            if (/봄|가을|계절|단풍|벚꽃/.test(p.P_LIST_CONTENT || '')) p.categories.push('매력적인 계절');
+          });
+          parks = data;
+          renderCards(parks.slice(0, 5), randomSection);
+          if (searchBtn) searchBtn.disabled = false;
+        })
+        .catch(err => {
+          console.error(err);
+          randomSection.textContent = 'API 로딩 실패';
+        });
+
+      if (searchInput && searchBtn) {
+        searchInput.addEventListener('input', () => {
+          searchBtn.disabled = !searchInput.value.trim();
+        });
+
+        searchBtn.addEventListener('click', () => {
+          const kw = searchInput.value.trim().toLowerCase();
+          const filtered = parks.filter(p => p.P_PARK?.toLowerCase().includes(kw));
+          resultSection.innerHTML = filtered.length ? '' : '<p>검색 결과가 없습니다.</p>';
+          renderCards(filtered, resultSection);
+        });
+      }
+
+      categoryButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          categoryButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const cat = btn.dataset.cat;
+          const filtered = parks.filter(p => Array.isArray(p.categories) && p.categories.includes(cat));
+          resultSection.innerHTML = filtered.length ? '' : '<p>해당 카테고리에 해당하는 공원이 없습니다.</p>';
+          renderCards(filtered, resultSection);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

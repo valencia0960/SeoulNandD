@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>추천 공원 목록 | SeoulDayNight</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      line-height: 1.5;
+    }
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    .logo { font-size: 1.5rem; font-weight: bold; }
+    .nav-list { list-style: none; display: flex; gap: 1rem; }
+    .nav-list a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    .nav-list .active { color: #0066cc; font-weight: 700; }
+    .header-actions a {
+      margin-left: 1rem;
+      text-decoration: none;
+      background: #0066cc;
+      color: #fff;
+      padding: .5rem 1rem;
+      border-radius: 4px;
+      transition: background .2s;
+    }
+    .header-actions a:hover { background: #0055aa; }
+
+    h2.section-title {
+      max-width: 1200px;
+      margin: 1rem auto;
+      padding: 0 1rem;
+      font-size: 1.5rem;
+      color: #333;
+    }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+      gap: 1rem;
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+    }
+    .feature-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+    .feature-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+    .feature-info {
+      padding: 1rem;
+      flex-grow: 1;
+    }
+    .feature-info h3 {
+      margin: 0 0 .5rem;
+      font-size: 1.2rem;
+      color: #333;
+    }
+    .feature-info p {
+      margin: 0;
+      font-size: .9rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="logo">SeoulDayNight</div>
+    <nav>
+      <ul class="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="pathways.html">산책로</a></li>
+        <li><a href="restaurants_day.html">맛집</a></li>
+        <li><a href="attractions_night.html">야경명소</a></li>
+        <li><a href="events.html">문화행사/이벤트</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="nightspots.html">탐험하기</a>
+      <a href="login.html">로그인</a>
+    </div>
+  </header>
+
+  <h2 class="section-title" id="title">추천 공원 목록</h2>
+  <div id="result-section" class="features">로딩 중…</div>
+
+  <script>
+    const API_KEY = '6a5a634c7576616c3636715a75706a';
+    const SERVICE = 'SearchParkInfoService';
+    const API_URL = `http://openapi.seoul.go.kr:8088/${API_KEY}/json/${SERVICE}/1/200`;
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('cat');
+    document.getElementById('title').textContent = `\u3010${category}\u3011 추천 공원`;
+
+    let map, markers = [], parks = [];
+
+    function renderCards(list, container) {
+      container.innerHTML = '';
+      list.forEach(item => {
+        const img = item.P_IMG || 'images/placeholder.jpg';
+        const desc = (item.P_LIST_CONTENT || '').split('.').slice(0, 2).join('. ') + '...';
+
+        const a = document.createElement('a');
+        a.href = `detail_park.html?p_idx=${item.P_IDX}`;
+        a.className = 'feature-card';
+        a.innerHTML = `
+          <img src="${img}" alt="${item.P_PARK}">
+          <div class="feature-info">
+            <h3>${item.P_PARK}</h3>
+            <p>${desc}</p>
+          </div>`;
+        container.appendChild(a);
+      });
+    }
+
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(json => {
+        const data = json[SERVICE]?.row || [];
+        data.forEach(p => {
+          p.categories = [];
+          if (/조용|고즈넉|호젓|사색|정숙/.test(p.P_LIST_CONTENT || '')) p.categories.push('고즈넉한');
+          if (/나무|정원|식물|꽃|초화/.test(p.MAIN_PLANTS || '')) p.categories.push('식물이 많은');
+          if (/전망|풍경|경치|뷰|조망/.test(p.P_LIST_CONTENT || '')) p.categories.push('풍광이 아름다운');
+          if (/지하철|버스|역|가까운|주차/.test(p.VISIT_ROAD || '')) p.categories.push('접근성이 좋은');
+          if (/0\.5km|0\.6km|0\.7km|0\.8km|0\.9km|1\.0km/.test(p.P_LIST_CONTENT || '')) p.categories.push('거리가 짧은');
+          if (/3km|4km|5km|6km|장거리/.test(p.P_LIST_CONTENT || '')) p.categories.push('거리가 긴');
+          if (/화장실|편의|벤치|운동시설|체육/.test(p.MAIN_EQUIP || '')) p.categories.push('편의시설이 잘 갖추어짐');
+          if (/애완동물|반려동물|목줄/.test(p.USE_REFER || '')) p.categories.push('애완동물 동반 가능');
+          if (/봄|가을|계절|단풍|벚꽃/.test(p.P_LIST_CONTENT || '')) p.categories.push('매력적인 계절');
+        });
+        parks = data.filter(p => p.categories.includes(category));
+        renderCards(parks, document.getElementById('result-section'));
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('result-section').textContent = 'API 로딩 실패';
+      });
+  </script>
+</body>
+</html>

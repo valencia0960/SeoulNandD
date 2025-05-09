@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>서울 야경명소 갤러리</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+  <style>
+    /* ─── 기초 스타일 ─── */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 1rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    
+.controls .icon {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+
+    /* ─── 헤더 ─── */
+   
+
+    /* ─── 히어로 ─── */
+    .hero {
+      position: relative;
+      height: 300px; /* 키우기 */
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .hero-night {
+      background: url('https://raw.githubusercontent.com/valencia0960/image/refs/heads/main/%EB%B0%B0%EA%B2%BD1.jpg')
+                  center/cover no-repeat;
+    }
+    .hero-overlay {
+      position:absolute; inset:0;
+      background: rgba(0,0,0,0.4);
+    }
+    .hero-text {
+      position: relative;
+      color: #fff;
+      font-size: 3rem; /* 키우기 */
+      text-align: center;
+      line-height: 300px; /* hero height와 일치 */
+    }
+
+    /* ─── 카드 그리드 ─── */
+    #spots {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr); /* 고정 4열 */
+      gap: 16px;
+      overflow:hidden;
+    }
+    .spot-card {
+      background:#fff;
+      border-radius:8px;
+      overflow:hidden;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      text-decoration:none;
+      color:inherit;
+      display:flex;
+      flex-direction:column;
+      cursor:pointer;
+    }
+    .spot-card img {
+      width:100%;
+      height:200px; /* 키우기 */
+      object-fit:cover;
+      flex-shrink:0;
+    }
+    .spot-info {
+      padding:16px; /* 여백 키우기 */
+      flex-grow:1;
+    }
+    .spot-info h3 {
+      margin:0 0 8px;
+      font-size:1.25rem; /* 키우기 */
+      color:#333;
+    }
+    .spot-info p {
+      margin:0;
+      font-size:1rem; /* 키우기 */
+      color:#555;
+    }
+
+    /* ─── 컨트롤 버튼 ─── */
+    .controls {
+      text-align:center;
+      margin:1rem 0;
+    }
+    .controls button {
+      margin:0 .5rem;
+      padding:.75rem 1.5rem; /* 크기 키우기 */
+      font-size:1.2rem;
+      cursor:pointer;
+      background:#0066cc;
+      color:#fff;
+      border:none;
+      border-radius:4px;
+      transition: background .2s;
+    }
+    .controls button:hover {
+      background:#0055aa;
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 -->
+  <header class="site-header">
+    <div class="logo">SeoulDayNight</div>
+    <nav>
+      <ul class="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="pathways.html" class="active">산책로</a></li>
+        <li><a href="./restaurants_day.html">맛집</a></li>
+        <li><a href="attractions_night.html">야경명소</a></li>
+        <li><a href="./events.html">문화행사/이벤트</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="nightspots.html" aria-label="탐험하기">탐험하기</a>
+      <a href="login.html">로그인</a>
+    </div>
+  </header>
+
+  <!-- 히어로 -->
+  <section id="hero-night" class="hero hero-night">
+    <div class="hero-overlay"></div>
+    <h1 class="hero-text">서울의 밤: 야경명소 갤러리</h1>
+  </section>
+
+  <!-- 갤러리 -->
+  <h1>야경명소 갤러리</h1>
+  <div id="spots">로딩 중…</div>
+
+  <!-- 컨트롤 -->
+   <!-- …갤러리 섹션 바로 아래에… -->
+   <div class="controls">
+    <button id="prevBtn" aria-label="이전">
+      <!-- Heroicon: Chevron Left -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </button>
+    <button id="toggleBtn" aria-label="일시정지">
+      <!-- Heroicon: Pause -->
+      <svg id="toggleIcon" xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19V5m4 14V5"/>
+      </svg>
+    </button>
+    <button id="nextBtn" aria-label="다음">
+      <!-- Heroicon: Chevron Right -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+  (function(){
+    const API_KEY     = '586b44485376616c38365263715054';
+    const RESPONSE    = 'json';
+    const SERVICE     = 'viewNightSpot';
+    const START_INDEX = 1;
+    const END_INDEX   = 500;
+    const apiUrl = 
+      `http://openapi.seoul.go.kr:8088/` +
+      `${API_KEY}/${RESPONSE}/${SERVICE}/` +
+      `${START_INDEX}/${END_INDEX}`;
+    const GMAP_KEY = 'AIzaSyAy_DG0i7oZwJ6TauuoiylGTDI_SO4pi2Y';
+
+    const elSpots   = document.getElementById('spots');
+    const prevBtn   = document.getElementById('prevBtn');
+    const nextBtn   = document.getElementById('nextBtn');
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    let spots = [], offset = 0, intervalId = null;
+    const GROUP = 8, PERIOD = 5000;
+
+    function renderGroup() {
+      elSpots.innerHTML = '';
+      if (!spots.length) return;
+      for (let i = 0; i < GROUP; i++) {
+        const idx = (offset + i) % spots.length;
+        const { TITLE, ADDR, FIRSTIMAGE, Y, X } = spots[idx];
+        const lat = parseFloat(Y), lng = parseFloat(X);
+
+        const imgUrl = FIRSTIMAGE ||
+          `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}` +
+          `&zoom=15&size=240x140&markers=${lat},${lng}` +
+          `&key=${GMAP_KEY}`;
+
+        const a = document.createElement('a');
+        a.href = `detail.html?title=${encodeURIComponent(TITLE)}`;
+        a.className = 'spot-card';
+        a.innerHTML = `
+          <img src="${imgUrl}" alt="${TITLE}">
+          <div class="spot-info">
+            <h3>${TITLE}</h3>
+            <p>${ADDR||''}</p>
+          </div>`;
+        elSpots.appendChild(a);
+      }
+    }
+
+    function startRotate() {
+      if (intervalId) return;
+      toggleBtn.textContent = '⏸ 일시정지';
+      intervalId = setInterval(() => {
+        offset = (offset + GROUP) % spots.length;
+        renderGroup();
+      }, PERIOD);
+    }
+    function stopRotate() {
+      clearInterval(intervalId);
+      intervalId = null;
+      toggleBtn.textContent = '▶ 자동재생';
+    }
+
+    prevBtn.onclick   = () => { stopRotate(); offset=(offset-GROUP+spots.length)%spots.length; renderGroup(); };
+    nextBtn.onclick   = () => { stopRotate(); offset=(offset+GROUP)%spots.length; renderGroup(); };
+    toggleBtn.onclick = () => intervalId ? stopRotate() : startRotate();
+
+    (async()=>{
+      try {
+        const res = await fetch(apiUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const j  = await res.json();
+        const r  = j[SERVICE];
+        if (r.RESULT.CODE !== 'INFO-000') throw new Error(r.RESULT.MESSAGE);
+        spots = Array.isArray(r.row) ? r.row : [];
+        if (!spots.length) {
+          elSpots.textContent = '데이터가 없습니다.';
+          return;
+        }
+        renderGroup();
+        startRotate();
+      } catch(e) {
+        elSpots.textContent = '로딩 오류: ' + e.message;
+        console.error(e);
+      }
+    })();
+  })();
+  // 기존에 선언된 것들…
+const toggleBtn   = document.getElementById('toggleBtn');
+const toggleIcon  = document.getElementById('toggleIcon');
+
+function startRotate() {
+  if (intervalId) return;
+  // Play 아이콘으로 변경
+  toggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5v14l11-7z"/>';
+  intervalId = setInterval(() => {
+    offset = (offset + GROUP) % spots.length;
+    renderGroup();
+  }, PERIOD);
+}
+
+function stopRotate() {
+  clearInterval(intervalId);
+  intervalId = null;
+  // Pause 아이콘으로 변경
+  toggleIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19V5m4 14V5"/>';
+}
+
+// 버튼 바인딩
+toggleBtn.addEventListener('click', () => {
+  intervalId ? stopRotate() : startRotate();
+});
+
+  </script>
+</body>
+</html>

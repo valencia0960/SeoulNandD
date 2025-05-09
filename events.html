@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>문화 행사 & 이벤트 | SeoulDayNight</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+
+    /* ─── 히어로 ─── */
+    .hero {
+      position:relative; height:300px;
+      background: url('https://raw.githubusercontent.com/valencia0960/image/refs/heads/main/%EB%B0%B0%EA%B2%BD1.jpg')
+                  center/cover no-repeat;
+      border-radius:8px; overflow:hidden; margin-bottom:1rem;
+    }
+    .hero-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.4); }
+    .hero-text {
+      position:relative; color:#fff;
+      font-size:3rem; text-align:center; line-height:300px;
+    }
+
+    /* ─── 검색 박스 ─── */
+    .search-box {
+      display:flex; max-width:600px;
+      margin:0 auto 2rem; padding:0 1rem;
+    }
+    .search-box input {
+      flex:1; padding:.75rem 1rem; font-size:1rem;
+      border:1px solid #ccc; border-radius:4px 0 0 4px; outline:none;
+    }
+    .search-box button {
+      padding:.75rem 1.5rem; font-size:1rem;
+      border:none; background:#0066cc; color:#fff;
+      border-radius:0 4px 4px 0; cursor:pointer;
+      transition:background .2s;
+    }
+    .search-box button:disabled { background:#aaa; cursor:not-allowed; }
+    .search-box button:hover:not(:disabled) { background:#0055aa; }
+
+    /* ─── 섹션 제목 ─── */
+    .section-title {
+      max-width:1200px; margin:0 auto .5rem;
+      padding:0 1rem; font-size:1.5rem; color:#333;
+    }
+
+    /* ─── 카드 그리드 ─── */
+    .features {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+      gap:1rem; max-width:1200px; margin:0 auto 2rem;
+    }
+    .feature-card {
+      background:#fff; border-radius:8px;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);
+      text-decoration:none; color:inherit;
+      display:flex; flex-direction:column;
+      overflow:hidden;
+    }
+    .feature-card img {
+      width:100%; height:160px; object-fit:cover;
+      flex-shrink:0;
+    }
+    .feature-info {
+      padding:1rem; flex-grow:1;
+    }
+    .feature-info h3 {
+      margin:0 0 .5rem; font-size:1.2rem; color:#222;
+    }
+    .feature-info p {
+      margin:0.25rem 0; font-size:.9rem; color:#555;
+    }
+  </style>
+</head>
+<body>
+  <!-- 헤더 -->
+  <header class="site-header">
+    <div class="logo">SeoulDayNight</div>
+    <nav>
+      <ul class="nav-list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="pathways.html">산책로</a></li>
+        <li><a href="restaurants_day.html">맛집</a></li>
+        <li><a href="attractions_night.html" class="active">야경명소</a></li>
+      
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a href="nightspots.html">탐험하기</a>
+      <a href="login.html">로그인</a>
+    </div>
+  </header>
+
+  <!-- 히어로 -->
+  <section class="hero">
+    <div class="hero-overlay"></div>
+    <h1 class="hero-text">문화 행사 & 이벤트</h1>
+  </section>
+
+  <!-- 검색 -->
+  <div class="search-box">
+    <input id="search-input" type="text" placeholder="공연/행사명 검색">
+    <button id="search-btn" disabled>검색</button>
+  </div>
+
+  <!-- 오늘의 추천 5개 -->
+  <h2 class="section-title">오늘의 추천 행사</h2>
+  <div id="random-section" class="features">로딩 중…</div>
+
+  <!-- 검색 결과 -->
+  <h2 class="section-title">검색 결과</h2>
+  <div id="result-section" class="features"></div>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const API_KEY        = '524855654f76616c32366c6e6a7a46';
+    const SERVICE        = 'culturalEventInfo';
+    const START_INDEX    = 1;
+    const END_INDEX      = 500;
+    const API_URL = `http://openapi.seoul.go.kr:8088/${API_KEY}/json/${SERVICE}/` +
+                    `${START_INDEX}/${END_INDEX}`;
+
+    const randomSection = document.getElementById('random-section');
+    const resultSection = document.getElementById('result-section');
+    const searchInput   = document.getElementById('search-input');
+    const searchBtn     = document.getElementById('search-btn');
+
+    let events = [];
+
+    function pickRandom(arr, n) {
+      const a = arr.slice(), r = [];
+      n = Math.min(n, a.length);
+      while (r.length < n) {
+        const i = Math.floor(Math.random() * a.length);
+        r.push(a.splice(i, 1)[0]);
+      }
+      return r;
+    }
+
+    function renderCards(list, container) {
+      container.innerHTML = '';
+      if (!list.length) {
+        container.textContent = '표시할 정보가 없습니다.';
+        return;
+      }
+      list.forEach(item => {
+        const img = item.MAIN_IMG || 'images/placeholder.jpg';
+        const date = item.DATE || item.STRTDATE || '날짜 정보 없음';
+        const a = document.createElement('a');
+        a.href = item.ORG_LINK || '#';
+        a.target = '_blank';
+        a.className = 'feature-card';
+        a.innerHTML = `
+          <img src="${img}" alt="${item.TITLE}">
+          <div class="feature-info">
+            <h3>${item.TITLE}</h3>
+            <p><strong>${date.split(' ')[0]}</strong></p>
+            <p>${item.PLACE || ''}</p>
+          </div>`;
+        container.appendChild(a);
+      });
+    }
+
+    // 데이터 로드
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(json => {
+        const rows = json[SERVICE]?.row || [];
+        events = rows;
+        // 랜덤 5개
+        renderCards(pickRandom(events, 5), randomSection);
+        searchBtn.disabled = false;
+      })
+      .catch(err => {
+        console.error(err);
+        randomSection.textContent = '데이터 로딩 오류';
+      });
+
+    // 검색 활성화
+    searchInput.addEventListener('input', e => {
+      searchBtn.disabled = !e.target.value.trim();
+    });
+
+    // 검색 클릭
+    searchBtn.addEventListener('click', () => {
+      const kw = searchInput.value.trim().toLowerCase();
+      const filtered = events.filter(ev =>
+        ev.TITLE?.toLowerCase().includes(kw)
+      );
+      renderCards(filtered, resultSection);
+    });
+  });
+  </script>
+</body>
+</html>
